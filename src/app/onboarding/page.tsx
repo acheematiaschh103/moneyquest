@@ -40,6 +40,48 @@ export default function OnboardingPage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
   const [outreach, setOutreach] = useState("");
+  const [aiPath, setAiPath] = useState("");
+const [aiReason, setAiReason] = useState("");
+const [aiLoading, setAiLoading] = useState(false);
+const [aiError, setAiError] = useState("");
+
+const generateAiRecommendation = async () => {
+  try {
+    setAiLoading(true);
+    setAiError("");
+
+    const response = await fetch("/api/recommend", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        goal,
+        budget,
+        time,
+        skills,
+        interests,
+        outreach,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI recommendation failed");
+    }
+
+    setAiPath(data.recommendedPath);
+    setAiReason(data.reason);
+    setStep(7);
+  } catch (error) {
+    console.error("AI recommendation error:", error);
+    setAiError("Could not generate your path. Please try again.");
+  } finally {
+    setAiLoading(false);
+  }
+};
+
   const resetQuest = () => {
     setGoal("");
     setBudget("");
@@ -453,7 +495,7 @@ export default function OnboardingPage() {
               </button>
   
               <button
-              onClick={() => setStep(7)}
+              onClick={generateAiRecommendation}
                 disabled={!outreach}
                 className="flex-1 rounded-xl bg-white px-6 py-4 font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
               >
@@ -466,7 +508,7 @@ export default function OnboardingPage() {
     );
   }
   if (step === 7) {
-    const recommendedPath = getRecommendedPath();
+    const recommendedPath = aiPath || getRecommendedPath();
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">
@@ -500,6 +542,12 @@ export default function OnboardingPage() {
                 {recommendedPath}
               </h2>
   
+              {aiReason && (
+  <p className="mt-4 leading-7 text-zinc-400">
+    {aiReason}
+  </p>
+)}
+
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-xl bg-black/30 p-4">
                   <p className="text-xs text-zinc-500">GOAL</p>
