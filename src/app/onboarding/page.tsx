@@ -32,6 +32,13 @@ const skillOptions = [
   "I'm not sure yet",
 ];
 
+type QuestDay = {
+  day: number;
+  title: string;
+  mission: string;
+  xp: number;
+};
+
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [goal, setGoal] = useState("");
@@ -44,6 +51,7 @@ export default function OnboardingPage() {
 const [aiReason, setAiReason] = useState("");
 const [aiLoading, setAiLoading] = useState(false);
 const [aiError, setAiError] = useState("");
+const [aiPlan, setAiPlan] = useState<QuestDay[]>([]);
 
 const generateAiRecommendation = async () => {
   try {
@@ -73,6 +81,7 @@ const generateAiRecommendation = async () => {
 
     setAiPath(data.recommendedPath);
     setAiReason(data.reason);
+    setAiPlan(data.days);
     setStep(7);
   } catch (error) {
     console.error("AI recommendation error:", error);
@@ -89,7 +98,12 @@ const generateAiRecommendation = async () => {
     setSkills([]);
     setInterests([]);
     setOutreach("");
+    setAiPath("");
+setAiReason("");
+setAiPlan([]);
+setAiError("");
     setStep(1);
+
   };
   const getRecommendedPath = () => {
     if (
@@ -589,11 +603,13 @@ const generateAiRecommendation = async () => {
                 ← Back
               </button>
   
-              <button 
-              onClick={() => setStep(8)}
-              className="flex-1 rounded-xl bg-white px-6 py-4 font-semibold text-black transition hover:bg-zinc-200">
-                Start this quest →
-              </button>
+              <button
+  onClick={() => setStep(8)}
+  disabled={aiLoading}
+  className="flex-1 rounded-xl bg-white px-6 py-4 font-semibold text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+>
+  {aiLoading ? "Building your quest..." : "Start this quest →"}
+</button>
             </div>
           </section>
         </div>
@@ -619,8 +635,9 @@ const generateAiRecommendation = async () => {
     };
   
     const mission =
-      firstMissions[recommendedPath] ??
-      "Complete one real action toward earning your first money online.";
+    aiPlan[0]?.mission ??
+    firstMissions[recommendedPath] ??
+    "Complete one real action toward earning your first money online.";
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">
@@ -699,8 +716,9 @@ const generateAiRecommendation = async () => {
     };
   
     const mission =
-      secondMissions[recommendedPath] ??
-      "Take one concrete step toward turning your chosen path into something you could sell.";
+  aiPlan[1]?.mission ??
+  secondMissions[recommendedPath] ??
+  "Take one concrete step toward turning your chosen path into something you could sell.";
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">
@@ -779,8 +797,9 @@ const generateAiRecommendation = async () => {
     };
   
     const mission =
-      thirdMissions[recommendedPath] ??
-      "Turn what you learned into one clear offer someone could understand instantly.";
+    aiPlan[2]?.mission ??
+    thirdMissions[recommendedPath] ??
+    "Turn what you learned into one clear offer someone could understand instantly.";
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">
@@ -859,8 +878,9 @@ const generateAiRecommendation = async () => {
     };
   
     const mission =
-      fourthMissions[recommendedPath] ??
-      "Put your offer in front of 5 real people who could potentially pay for it.";
+  aiPlan[3]?.mission ??
+  fourthMissions[recommendedPath] ??
+  "Put your offer in front of 5 real people who could potentially pay for it.";
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">
@@ -939,8 +959,9 @@ const generateAiRecommendation = async () => {
     };
   
     const mission =
-      fifthMissions[recommendedPath] ??
-      "Review what happened yesterday and improve your offer based on real feedback.";
+    aiPlan[4]?.mission ??
+    fifthMissions[recommendedPath] ??
+    "Review what happened yesterday and improve your offer based on real feedback.";
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">
@@ -1019,8 +1040,9 @@ const generateAiRecommendation = async () => {
     };
   
     const mission =
-      sixthMissions[recommendedPath] ??
-      "Take your improved offer back to the market and test it again.";
+    aiPlan[5]?.mission ??
+    sixthMissions[recommendedPath] ??
+    "Take your improved offer back to the market and test it again.";
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">
@@ -1099,8 +1121,9 @@ const generateAiRecommendation = async () => {
     };
   
     const mission =
-      seventhMissions[recommendedPath] ??
-      "Review what you learned and decide whether to continue this path or try a different one.";
+    aiPlan[6]?.mission ??
+    seventhMissions[recommendedPath] ??
+    "Review what you learned and decide whether to continue this path or try a different one.";
   
     return (
       <main className="min-h-screen bg-[#09090b] text-white">

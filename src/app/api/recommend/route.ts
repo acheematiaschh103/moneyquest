@@ -73,8 +73,60 @@ Return ONLY valid JSON in this exact format:
 
 {
   "recommendedPath": "one exact path from the list",
-  "reason": "2-3 concise sentences explaining why this path fits the user"
+  "reason": "2-3 concise sentences explaining why this path fits the user",
+  "days": [
+    {
+      "day": 1,
+      "title": "Short motivating title",
+      "mission": "Concrete action for the user",
+      "xp": 50
+    },
+    {
+      "day": 2,
+      "title": "Short motivating title",
+      "mission": "Concrete action for the user",
+      "xp": 50
+    },
+    {
+      "day": 3,
+      "title": "Short motivating title",
+      "mission": "Concrete action for the user",
+      "xp": 50
+    },
+    {
+      "day": 4,
+      "title": "Short motivating title",
+      "mission": "Concrete action for the user",
+      "xp": 75
+    },
+    {
+      "day": 5,
+      "title": "Short motivating title",
+      "mission": "Concrete action for the user",
+      "xp": 75
+    },
+    {
+      "day": 6,
+      "title": "Short motivating title",
+      "mission": "Concrete action for the user",
+      "xp": 100
+    },
+    {
+      "day": 7,
+      "title": "Short motivating title",
+      "mission": "Concrete action for the user",
+      "xp": 150
+    }
+  ]
 }
+
+The 7-day plan must:
+- fit the selected path
+- fit the user's budget and available time
+- contain real-world actions, not vague research
+- build progressively from Day 1 to Day 7
+- include market validation where appropriate
+- avoid promising guaranteed income
 `;
 
 let response: Response | undefined;
@@ -105,7 +157,7 @@ for (let attempt = 1; attempt <= 3; attempt++) {
   }
 
   if (
-    ![429, 500, 502, 503, 504].includes(response.status) ||
+    ![500, 502, 503, 504].includes(response.status) ||
     attempt === 3
   ) {
     break;
@@ -140,10 +192,15 @@ if (!response) {
     if (!allowedPaths.includes(result.recommendedPath)) {
       throw new Error("Gemini returned an invalid path");
     }
-
+    
+    if (!Array.isArray(result.days) || result.days.length !== 7) {
+      throw new Error("Gemini returned an invalid 7-day plan");
+    }
+    
     return NextResponse.json({
       recommendedPath: result.recommendedPath,
       reason: result.reason,
+      days: result.days,
     });
   } catch (error) {
     console.error("Recommend error:", error);
